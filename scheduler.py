@@ -28,8 +28,10 @@ def get_weather_data(city):
     response = requests.get(base_url)
     if response.status_code == 200:
         return response.json()
+    if response.status_code == 400:
+        print(f"Failed to fetch weather data for {city} (city unavailable)")
     else:
-        print(f"Failed to fetch weather data for {city}")
+        print(f"Failed to fetch weather data for {city} (server\API connection issue)")
         return None
 
 # Function to send message to SQS
@@ -51,6 +53,10 @@ while True:
     for city in cities:
         weather_data = get_weather_data(city)
         if weather_data:
-            send_message_to_sqs(weather_data)
-            print(f"Weather data for {city} sent to SQS")
+            try:
+                send_message_to_sqs(weather_data)
+                print(f"Weather data for {city} sent to SQS")
+            except Exception as e:
+                print(f"An error occurred, Check SQS URL.\n{e}")
+                exit(-1)
         time.sleep(60)
