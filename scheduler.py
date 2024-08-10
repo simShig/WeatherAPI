@@ -46,6 +46,7 @@ def send_message_to_sqs(message_body):
     print(f"Message sent to SQS with ID: {response['MessageId']}")
 
 # infinite loop to fetch weather data and send to SQS
+print (cities)
 while True:
     for city in cities:
         weather_data = get_weather_data(city)
