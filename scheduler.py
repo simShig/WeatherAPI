@@ -47,16 +47,23 @@ def send_message_to_sqs(message_body):
     )
     print(f"Message sent to SQS with ID: {response['MessageId']}")
 
+
+def main():
+
+    print (cities)
+
 # infinite loop to fetch weather data and send to SQS
-print (cities)
-while True:
-    for city in cities:
-        weather_data = get_weather_data(city)
-        if weather_data:
-            try:
-                send_message_to_sqs(weather_data)
-                print(f"Weather data for {city} sent to SQS")
-            except Exception as e:
-                print(f"An error occurred, Check SQS URL.\n{e}")
-                exit(-1)
-        time.sleep(60)
+    while True:
+        for city in cities:
+            weather_data = get_weather_data(city)
+            if weather_data:
+                try:
+                    send_message_to_sqs(weather_data)
+                    print(f"Weather data for {city} sent to SQS")
+                except Exception as e:
+                    print(f"An error occurred, Check SQS URL.\n{e}")
+                    exit(-1)
+            time.sleep(3)
+
+if __name__ == '__main__':
+    main()
