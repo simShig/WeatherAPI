@@ -9,6 +9,7 @@ load_dotenv()
 # Load AWS SQS and keys
 queue_url = os.getenv('SQS_QUEUE_URL')
 sqs = boto3.client('sqs', region_name="us-east-1")
+db_path = os.getenv('DB_NAME')
 
 def process_weather_data(message):
     '''
@@ -31,7 +32,7 @@ def process_weather_data(message):
         temp_c = data['current']['temp_c']
         condition_text = data['current']['condition']['text']
 
-        conn = sqlite3.connect('weather_data.db')
+        conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute('''
         INSERT INTO weather (location_name, location_country, location_localtime, temp_c, condition_text)
@@ -49,7 +50,7 @@ def process_weather_data(message):
 
 def main():
     # SQLite DB connect, create if needed
-    conn = sqlite3.connect('weather_data.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS weather (

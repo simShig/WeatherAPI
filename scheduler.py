@@ -12,6 +12,8 @@ load_dotenv()
 sqs = boto3.client('sqs', region_name='us-east-1')
 queue_url = os.getenv('SQS_QUEUE_URL')
 api_key = os.getenv('WEATHER_API_KEY')
+db_path = os.getenv('DB_NAME')
+
 
 def get_weather_data(city):
     '''

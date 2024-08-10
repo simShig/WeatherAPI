@@ -1,9 +1,14 @@
 from flask import Flask, jsonify
 import sqlite3
 from collections import OrderedDict
+import os
+from dotenv import load_dotenv
 
 
 app = Flask(__name__)
+
+load_dotenv()
+db_path = os.getenv('DB_NAME')
 
 
 def calc_city_props(rows):
@@ -42,7 +47,7 @@ def get_weather_data_by_country(country):
     :param country: which counrty is our point of interest
     :return: JSON formatted list of agragated data
     '''
-    conn = sqlite3.connect('weather_data.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     cursor.execute('''
