@@ -13,10 +13,6 @@ sqs = boto3.client('sqs', region_name='us-east-1')
 queue_url = os.getenv('SQS_QUEUE_URL')
 api_key = os.getenv('WEATHER_API_KEY')
 
-# Load list of cities for debugging this part
-with open('cities.txt', 'r') as file:
-    cities = [line.strip() for line in file.readlines()]
-
 def get_weather_data(city):
     '''
     fetch wether data (as JSON) for specific city
@@ -49,6 +45,10 @@ def send_message_to_sqs(message_body):
 
 
 def main():
+
+    # Load list of cities for debugging this part
+    with open('cities.txt', 'r') as file:
+        cities = [line.strip() for line in file.readlines()]
 
     print (cities)
 
