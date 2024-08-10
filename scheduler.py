@@ -63,7 +63,7 @@ def main():
                 except Exception as e:
                     print(f"An error occurred, Check SQS URL.\n{e}")
                     exit(-1)
-            time.sleep(3)
+            time.sleep(60)
 
 if __name__ == '__main__':
     main()

@@ -10,21 +10,6 @@ load_dotenv()
 queue_url = os.getenv('SQS_QUEUE_URL')
 sqs = boto3.client('sqs', region_name="us-east-1")
 
-# SQLite DB connect, create if needed
-conn = sqlite3.connect('weather_data.db')
-cursor = conn.cursor()
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS weather (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    location_name TEXT,
-    location_country TEXT,
-    location_localtime TEXT,
-    temp_c REAL,
-    condition_text TEXT
-);
-''')
-conn.commit()
-
 def process_weather_data(message):
     '''
     get message from the queue, process the message and save to DB
@@ -46,7 +31,8 @@ def process_weather_data(message):
         temp_c = data['current']['temp_c']
         condition_text = data['current']['condition']['text']
 
-
+        conn = sqlite3.connect('weather_data.db')
+        cursor = conn.cursor()
         cursor.execute('''
         INSERT INTO weather (location_name, location_country, location_localtime, temp_c, condition_text)
         VALUES (?, ?, ?, ?, ?)
@@ -61,20 +47,40 @@ def process_weather_data(message):
         print(f"[X] An error occurred: {e}")
 
 
-# infinite loop to fetch massages from SQS and process to the DB
-while True:
-    response = sqs.receive_message(
-        QueueUrl=queue_url,
-        MaxNumberOfMessages=1,
-        WaitTimeSeconds=20
-    )
+def main():
+    # SQLite DB connect, create if needed
+    conn = sqlite3.connect('weather_data.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS weather (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        location_name TEXT,
+        location_country TEXT,
+        location_localtime TEXT,
+        temp_c REAL,
+        condition_text TEXT
+    );
+    ''')
+    conn.commit()
 
-    messages = response.get('Messages', [])
-    for message in messages:
-        process_weather_data(message)
-        # delete massage from queue after processing
-        sqs.delete_message(
+    # infinite loop to fetch massages from SQS and process to the DB
+    while True:
+        response = sqs.receive_message(
             QueueUrl=queue_url,
-            ReceiptHandle=message['ReceiptHandle']
+            MaxNumberOfMessages=1,
+            WaitTimeSeconds=20
         )
-        print("Message deleted from queue")
+
+        messages = response.get('Messages', [])
+        for message in messages:
+
+            process_weather_data(message)
+            # delete massage from queue after processing
+            sqs.delete_message(
+                QueueUrl=queue_url,
+                ReceiptHandle=message['ReceiptHandle']
+            )
+
+
+if __name__ == '__main__':
+    main()
